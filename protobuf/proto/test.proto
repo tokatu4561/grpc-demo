@@ -1,0 +1,50 @@
+syntax = "proto3"; //シンタックス 特別理由がない場合は proto3
+
+package test; // パッケージ名 名前衝突を避ける namespaceの様なもの
+
+import "proto/date.proto"; // インポートできる
+
+// タグについて
+// ・フィールドの識別子 フィールド名でなくタグ番号によって識別される
+// ・19000から19999までのタグ番号は予約されている
+
+// メッセージ型の説明
+// ・複数のフィールドを持つことができる
+// ・各言語のコードとしてコンパイルした場合、構造体やクラスに変換される
+// ・１つのファイルに複数のmessage型を定義できる
+// ・フィールドには、数値、文字列、真偽値、別のメッセージ型、配列などを指定できる
+// ・フィールドには、オプションとして、デフォルト値、フィールド番号、フィールドの種類などを指定できる
+message Person {
+  string name = 1; //フィールドの型 フィールド名 タグ番号
+  int32 id = 2;
+  string email = 3;
+  PhoneType phone = 4; //列挙型
+  repeated string friends = 5; // 繰り返し
+  map<string, string> languages = 6; // マップ　連想配列のような
+}
+
+// 列挙型
+enum PhoneType {
+  MOBILE = 0;
+  HOME = 1;
+  WORK = 2;
+}
+
+// スカラー型
+// ・数値型 基本的に intで良いいらしい
+//   ・int32, int64, loat, double
+//   ・uint32, uint64 (unsigntd 正の数)
+//   ・sint32, sint64 (signed 符号付き)
+//   ・fixed32, fixed64 (固定小数点)
+//   ・sfixed32, sfixed64 (固定小数点 符号付き)
+// ・文字列型
+//   ・string
+// ・真偽値型
+//   ・bool
+
+// それぞれの型のデフォルト値
+// ・数値型 0
+// ・文字列型 空文字列
+// ・真偽値型 false
+// ・列挙型 タグ番号が0の値
+// ・repeted フィールド 空のリスト
