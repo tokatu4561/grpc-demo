@@ -51,3 +51,40 @@ enum PhoneType {
 // ・真偽値型 false
 // ・列挙型 タグ番号が0の値
 // ・repeted フィールド 空のリスト
+
+// Service とは
+// ・RPC(メソッド)の実装単位
+// サービス内に定義するメソッドがエンドポイントになる
+// 1サービス内に複数のメソッドを定義できる
+
+message PersonRequest {
+  int32 id = 1;
+}
+
+message PersonResponse {
+  Person person = 1;
+}
+
+service PersonService {
+  // Unary RPC
+  // ・１リクエストに対して１レスポンスを返す
+  // ・通常の関数コールのように扱うことができる
+  // ・用途はサーバー管理クエストのapi に使われることが多い
+  rpc GetPerson(PersonRequest) returns (PersonResponse) {}
+  // Server Streaming RPC
+  // ・１リクエストに対して複数のレスポンスを返す
+  // ・レスポンスをストリームで返す クライアントはサーバーから送信完了の信号が送信されるまでストリームのメッセージを読み続ける
+  // ・用途はサーバーからのプッシュ通知などに使われることが多い
+  rpc GetPersonList(PersonRequest) returns (stream PersonResponse) {}
+  // Client Streaming RPC
+  // ・複数のリクエストに対して１レスポンスを返す
+  // ・リクエストをストリームで送信する クライアントはサーバーからのレスポンスを受け取るまでリクエストを送信し続ける
+  // ・用途はサイズの大きなファイルのアップロードなどに使われることが多い
+  rpc UploadPersonListFile(stream PersonRequest) returns (PersonResponse) {}
+  // Bidirectional Streaming RPC
+  // ・複数のリクエストに対して複数のレスポンスを返す
+  // ・リクエストとレスポンスをストリームで送信する クライアントとサーバーのストリームが独立しており、リクエストとレスポンスはどの様な順序でも良い
+  // ・用途はチャットやオンライン対戦ゲームなどに使われることが多い
+  rpc Chat(stream PersonRequest) returns (stream PersonResponse) {}
+}
+
