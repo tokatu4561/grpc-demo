@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package file;
+
+option go_package = "./pb";
+
+// ファイル転送 スキーマを定義
+
+message ListFilesRequest {
+    string path = 1;
+}
+
+message ListFIlesResponse {
+    repeated string filenames = 1;
+}
+
+service FileService {
+    // unary rpc
+    rpc ListFile(ListFilesRequest) returns (ListFIlesResponse);
+}
+
+// gppc のコンパイルコマンd
+// protoc --go_out=plugins=grpc:./pb file.proto
+// protoc -I. --go_out=. --go-grpc_out=. proto/*.proto
+
+// --go-grpc_out オプションを指定すると、proto ファイルからサーバーとクライアントの雛形を生成するオプション
+// . を指定するとカレントディレクトリに
+// --go_out オプションを指定すると、grpc のコードが生成される
