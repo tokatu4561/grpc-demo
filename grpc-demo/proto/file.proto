@@ -14,9 +14,19 @@ message ListFIlesResponse {
     repeated string filenames = 1;
 }
 
+// 追加
+message DownloadFileRequest {
+    string filename = 1;
+}
+message DownloadFileResponse {
+    bytes content = 1;
+}
+
 service FileService {
     // unary rpc
     rpc ListFile(ListFilesRequest) returns (ListFIlesResponse);
+    // server streaming rpc 追加
+    rpc Download(DownloadFileRequest) returns (stream DownloadFileResponse);
 }
 
 // gppc のコンパイルコマンd
