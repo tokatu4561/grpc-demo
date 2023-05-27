@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 
 	"github.com/tokatu4561/grpc-demo/grpc-demo/pb"
@@ -18,7 +19,10 @@ func main() {
 
 	// create client
 	client := pb.NewFileServiceClient(con)
+	// call ListFiles
 	callListFiles(client)
+	// call Download
+	callDownload(client)
 }
 
 func callListFiles(client pb.FileServiceClient) {
@@ -29,4 +33,28 @@ func callListFiles(client pb.FileServiceClient) {
 	}
 
 	log.Printf("filenames: %v¥n", res.GetFilenames())
+}
+
+func callDownload(client pb.FileServiceClient) {
+	// call Download
+	stream, err := client.Download(context.Background(), &pb.DownloadFileRequest{
+		Filename: "test.txt",
+	})
+	if err != nil {
+		log.Fatalf("failed to Download: %v¥n", err)
+	}
+
+	// ファイルを受信して標準出力に書き出す
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatalf("failed to receive: %v¥n", err)
+		}
+
+		log.Printf("received: %v¥n", res.GetContent())
+	}
 }
