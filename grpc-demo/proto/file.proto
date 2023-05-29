@@ -36,3 +36,6 @@ service FileService {
 // --go-grpc_out オプションを指定すると、proto ファイルからサーバーとクライアントの雛形を生成するオプション
 // . を指定するとカレントディレクトリに
 // --go_out オプションを指定すると、grpc のコードが生成される
+
+
+// gp get github.com/grpc-ecosystem/go-grpc-middleware

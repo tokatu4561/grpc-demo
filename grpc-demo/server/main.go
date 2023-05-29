@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,10 +12,46 @@ import (
 
 	"github.com/tokatu4561/grpc-demo/grpc-demo/pb"
 	"google.golang.org/grpc"
+
+	// grpc middleware
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	// auth
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 )
 
 type server struct {
 	pb.UnimplementedFileServiceServer
+}
+
+// リクエストとレスポンスの前後でログを挟む interceptor
+func myLogging() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{},error){
+		// リクエストデータ
+		log.Printf("request data: %v", req)
+		resp, err := handler(ctx, req)
+		if err != nil { 
+			return nil, err
+		}
+		// レスポンスデータ
+		log.Printf("response data: %v", resp)
+
+		return resp, nil
+	}
+}
+
+func authorize(ctx context.Context) (context.Context, error) {
+	// 認証処理
+	token, err := grpc_auth.AuthFromMD(ctx, "Bearer")
+	if err != nil {
+		return nil, err
+	}
+
+	// test でなければ認証エラー
+	if token != "test" {
+		return nil, errors.New("invalid token")
+	}
+
+	return ctx, nil
 }
 
 // implement ListFiles method
@@ -80,7 +117,14 @@ func (s *server) Download(req *pb.DownloadFileRequest, stream pb.FileService_Dow
 
 func main() {
 	// create server
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(
+		grpc_middleware.ChainUnaryServer(
+			// ログ出力
+			myLogging(),
+			// 認証
+			grpc_auth.UnaryServerInterceptor(authorize),
+		),
+	))
 
 	// register service
 	pb.RegisterFileServiceServer(s, &server{})
